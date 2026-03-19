@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Overtime Pro</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="animated-bg" aria-hidden="true">
+    <span class="orb orb-1"></span><span class="orb orb-2"></span>
+    <span class="orb orb-3"></span><span class="orb orb-4"></span>
+    <span class="orb orb-5"></span>
+  </div>
+
+  <div class="app-shell">
+
+    <!-- ===================== LOGIN SCREEN ===================== -->
+    <section class="login-screen" id="loginScreen">
+      <div class="login-box">
+        <!-- Animated Border -->
+        <div class="login-border"></div>
+        
+        <div class="login-content glass">
+          <div class="logo-login">
+            <img src="logo.png" alt="Overtime Pro" onerror="this.style.display='none'">
+            <h1>Overtime <span>Pro</span></h1>
+          </div>
+
+          <h2 class="login-title" data-i18n="loginTitle">تسجيل الدخول</h2>
+
+          <div class="login-field">
+            <span class="input-icon">👤</span>
+            <input type="text" id="loginUser" placeholder="اسم المستخدم" data-i18n-placeholder="username">
+          </div>
+
+          <div class="login-field password-field">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="loginPass" placeholder="كلمة المرور" data-i18n-placeholder="password">
+            <button type="button" class="eye-btn" id="eyeBtn" onclick="togglePassword()">👁️</button>
+          </div>
+
+          <label class="remember-me">
+            <input type="checkbox" id="rememberMe">
+            <span class="checkmark"></span>
+            <span data-i18n="rememberMe">تذكرني</span>
+          </label>
+
+          <button class="login-btn" onclick="doLogin()">
+            <span data-i18n="loginBtn">دخول</span>
+            <div class="btn-shine"></div>
+          </button>
+
+          <div class="login-links">
+            <a href="#" onclick="forgotPassword()" data-i18n="forgotPass">نسيت كلمة المرور؟</a>
+            <a href="#" onclick="showRegister()" data-i18n="register">تسجيل جديد</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== MAIN APP (Hidden initially) ===================== -->
+    <div id="mainApp" style="display:none;">
+      
+      <!-- Top Bar -->
+      <header class="topbar glass">
+        <div class="brand">
+          <div class="logo-mark">
+            <img src="logo.png" class="logo-img" alt="Logo" />
+          </div>
+          <div class="brand-text">
+            <h1>Overtime <span>Pro</span></h1>
+            <p id="subtitle"></p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="icon-btn" id="langBtn" type="button">EN</button>
+          <button class="icon-btn" id="themeBtn" type="button">☀️</button>
+          <button class="icon-btn" id="logoutBtn" type="button" title="خروج" onclick="doLogout()">🚪</button>
+        </div>
+      </header>
+
+      <!-- Alert Banner -->
+      <section id="banner" class="banner glass" style="display:none;">
+        <div class="banner-text" id="bannerText"></div>
+        <button class="banner-close" id="bannerClose" type="button">✕</button>
+      </section>
+
+      <main class="screens">
+        <!-- HOME -->
+        <section class="screen active" id="homeScreen">
+          <div class="spectrum-bar"></div>
+          <section class="glass-card hero-card">
+            <div class="hero-head">
+              <div>
+                <span class="badge live">LIVE</span>
+                <h2 data-i18n="overview">نظرة عامة</h2>
+              </div>
+              <div class="cycle-chip" id="cycleText"></div>
+            </div>
+            <div class="hero-grid">
+              <div class="gauge-box">
+                <canvas id="gauge" width="180" height="180"></canvas>
+                <div class="gauge-center">
+                  <strong id="gaugeValue">0</strong>
+                  <span data-i18n="hours">ساعة</span>
+                </div>
+              </div>
+              <div class="summary-col">
+                <div class="summary-card accent">
+                  <span data-i18n="gross">الإجمالي</span>
+                  <strong id="grossValue">0</strong>
+                </div>
+                <div class="summary-card">
+                  <span data-i18n="tax">الضريبة</span>
+                  <strong id="taxValue">0</strong>
+                </div>
+                <div class="summary-card">
+                  <span data-i18n="net">الصافي</span>
+                  <strong id="netValue">0</strong>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="mini-grid">
+            <article class="mini-card"><span data-i18n="workDays">أيام العمل</span><strong id="workDaysValue">0</strong></article>
+            <article class="mini-card"><span data-i18n="officialDays">أيام عطلات</span><strong id="officialDaysValue">0</strong></article>
+            <article class="mini-card"><span data-i18n="leaveRemaining">رصيد الإجازات</span><strong id="leavesRemainingValue">0</strong></article>
+            <article class="mini-card"><span data-i18n="absentDays">أيام الغياب</span><strong id="absentDaysValue">0</strong></article>
+          </section>
+
+          <div class="cta-row">
+            <button class="cta primary" onclick="openAdd()">➕ <span data-i18n="addDay">إضافة يوم</span></button>
+            <button class="cta" onclick="goTo('reportsScreen')">📊 <span data-i18n="reports">التقارير</span></button>
+          </div>
+
+          <section class="glass-card chart-card">
+            <div class="section-head">
+              <h3 data-i18n="trend">اتجاه آخر الأيام</h3>
+              <span class="section-chip" id="entriesCount">0</span>
+            </div>
+            <canvas id="lineChart" width="340" height="120"></canvas>
+          </section>
+        </section>
+
+        <!-- HISTORY -->
+        <section class="screen" id="historyScreen">
+          <div class="screen-title">
+            <h2 data-i18n="history">السجل</h2>
+            <button class="link-btn" onclick="clearHistory()" data-i18n="clearAll">مسح الكل</button>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </section>
+
+        <!-- ADD -->
+        <section class="screen" id="addScreen">
+          <div class="screen-title">
+            <h2 id="addTitle" data-i18n="addDay">إضافة يوم</h2>
+            <button class="link-btn" id="cancelEditBtn" style="display:none;" onclick="cancelEdit()" data-i18n="cancelEdit">إلغاء</button>
+          </div>
+          <div class="glass-card form-card">
+            <div class="field">
+              <label data-i18n="dayType">نوع اليوم</label>
+              <div class="day-types">
+                <label class="day-type active" data-type="regular">
+                  <input type="radio" name="dayType" value="regular" checked>
+                  <span data-i18n="typeRegular">🟢 يوم عادي</span>
+                </label>
+                <label class="day-type" data-type="official">
+                  <input type="radio" name="dayType" value="official">
+                  <span data-i18n="typeOfficial">🔵 جمعة/عطلة (×2)</span>
+                </label>
+                <label class="day-type" data-type="leave">
+                  <input type="radio" name="dayType" value="leave">
+                  <span data-i18n="typeLeave">🟡 إجازة</span>
+                </label>
+                <label class="day-type" data-type="absent">
+                  <input type="radio" name="dayType" value="absent">
+                  <span data-i18n="typeAbsent">🔴 غياب</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="field"><label data-i18n="date">التاريخ</label><input type="date" id="entryDate"></div>
+
+            <div id="regularFields">
+              <div class="field">
+                <label data-i18n="endTime">وقت الانتهاء</label>
+                <input type="time" id="endTime">
+                <div class="hint" id="otHint"></div>
+              </div>
+              <div class="field"><label data-i18n="note">ملاحظة</label><input type="text" id="entryNote"></div>
+            </div>
+
+            <div id="officialFields" style="display:none;">
+              <div class="field">
+                <label data-i18n="officialHours">عدد الساعات</label>
+                <input type="number" step="0.5" id="officialHours" placeholder="0">
+                <div class="hint" id="officialHint"></div>
+              </div>
+              <div class="field"><label data-i18n="withWho">مين كان معاك؟</label><input type="text" id="withWho"></div>
+              <div class="field"><label data-i18n="note">ملاحظة</label><input type="text" id="officialNote"></div>
+            </div>
+
+            <div id="simpleNoteFields" style="display:none;">
+              <div class="field"><label data-i18n="note">ملاحظة</label><input type="text" id="simpleNote"></div>
+            </div>
+
+            <div class="preview-box">
+              <div class="preview-row"><span data-i18n="previewHours">الساعات</span><strong id="previewHours">0</strong></div>
+              <div class="preview-row"><span data-i18n="previewGross">الإجمالي</span><strong id="previewGross">0</strong></div>
+              <div class="preview-row"><span data-i18n="previewTax">الضريبة</span><strong id="previewTax">0</strong></div>
+              <div class="preview-row"><span data-i18n="previewNet">الصافي</span><strong id="previewNet" class="accent-text">0</strong></div>
+            </div>
+
+            <button class="cta primary full" onclick="saveEntry()">💾 <span data-i18n="save">حفظ</span></button>
+          </div>
+        </section>
+
+        <!-- REPORTS -->
+        <section class="screen" id="reportsScreen">
+          <div class="screen-title">
+            <h2 data-i18n="reports">التقارير</h2>
+            <div class="report-actions">
+              <button class="chip-btn" onclick="shareWhatsApp()">واتساب</button>
+              <button class="chip-btn" onclick="exportPDF()">PDF</button>
+            </div>
+          </div>
+          <section class="glass-card chart-card">
+            <div class="section-head"><h3 data-i18n="chartLast7">آخر 7 أيام</h3><span class="section-chip" id="last7Chip"></span></div>
+            <canvas id="barLast7" height="170"></canvas>
+          </section>
+          <section class="glass-card chart-card">
+            <div class="section-head"><h3 data-i18n="chartCycle">الدورة الحالية</h3><span class="section-chip" id="cycleChip"></span></div>
+            <canvas id="barCycle" height="170"></canvas>
+          </section>
+          <section class="glass-card calendar-card">
+            <div class="section-head"><h3 data-i18n="calendar">التقويم</h3><span class="section-chip" id="calendarChip"></span></div>
+            <div class="calendar-legend">
+              <span class="lg"><i class="c-regular"></i><b data-i18n="typeRegular">عادي</b></span>
+              <span class="lg"><i class="c-official"></i><b data-i18n="typeOfficial">عطلة</b></span>
+              <span class="lg"><i class="c-leave"></i><b data-i18n="typeLeave">إجازة</b></span>
+              <span class="lg"><i class="c-absent"></i><b data-i18n="typeAbsent">غياب</b></span>
+            </div>
+            <div id="calendarGrid" class="calendar-grid"></div>
+          </section>
+        </section>
+
+        <!-- SETTINGS -->
+        <section class="screen" id="settingsScreen">
+          <div class="screen-title"><h2 data-i18n="settings">الإعدادات</h2></div>
+          <div class="glass-card form-card">
+            <h3 class="block-title" data-i18n="money">الماليات</h3>
+            <div class="field"><label data-i18n="hourRate">سعر الساعة</label><input type="number" id="hourRateInput"></div>
+            <div class="field"><label data-i18n="taxRate">الضريبة %</label><input type="number" id="taxRateInput"></div>
+            <div class="field"><label data-i18n="otStart">بداية OT</label><input type="time" id="otStartInput"></div>
+            <div class="field"><label data-i18n="otMultiplierRegular">مضاعف العادي</label><input type="number" step="0.1" id="multRegularInput"></div>
+            <div class="field"><label data-i18n="otMultiplierOfficial">مضاعف العطلة</label><input type="number" step="0.1" id="multOfficialInput"></div>
+
+            <h3 class="block-title" data-i18n="leaves">الإجازات</h3>
+            <div class="field"><label data-i18n="leaveTotal">الرصيد السنوي</label><input type="number" id="leaveTotalInput"></div>
+
+            <h3 class="block-title" data-i18n="backup">نسخ احتياطي</h3>
+            <div class="btn-row">
+              <button class="cta" onclick="exportBackup()">⬇️ تصدير</button>
+              <label class="cta file-btn">⬆️ استيراد<input type="file" id="restoreFile" accept="application/json" onchange="importBackup(event)"></label>
+            </div>
+
+            <button class="cta primary full" onclick="saveSettings()" data-i18n="saveSettings">حفظ الإعدادات</button>
+          </div>
+
+          <div class="glass-card palette-card">
+            <div class="section-head"><h3 data-i18n="palette">ألوان نيون</h3></div>
+            <div class="palette-grid" id="paletteGrid"></div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Bottom Nav -->
+      <nav class="bottom-nav glass">
+        <button class="nav-item active" data-target="homeScreen" onclick="goTo('homeScreen')"><span>🏠</span><small data-i18n="navHome">الرئيسية</small></button>
+        <button class="nav-item" data-target="historyScreen" onclick="goTo('historyScreen')"><span>📋</span><small data-i18n="navHistory">السجل</small></button>
+        <button class="nav-fab" onclick="openAdd()">＋</button>
+        <button class="nav-item" data-target="reportsScreen" onclick="goTo('reportsScreen')"><span>📊</span><small data-i18n="navReports">تقارير</small></button>
+        <button class="nav-item" data-target="settingsScreen" onclick="goTo('settingsScreen')"><span>⚙️</span><small data-i18n="navSettings">إعدادات</small></button>
+      </nav>
+    </div>
+
+    <div id="toast" class="toast"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
